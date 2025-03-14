@@ -45,12 +45,9 @@ export class TicketGeneratorLambdaStack extends Stack {
       functionName: 'ticket-generator-lambda',
       runtime: lambda.Runtime.NODEJS_18_X,
       architecture: lambda.Architecture.ARM_64,
-      allowAllOutbound: true,
       vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        onePerAz: true,
-        availabilityZones: ['eu-central-1a'],
       },
       securityGroups: [securityGroup],
       handler: 'index.handler',
