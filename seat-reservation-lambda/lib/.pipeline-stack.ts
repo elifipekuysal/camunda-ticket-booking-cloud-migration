@@ -9,6 +9,7 @@ import {
   Duration,
   CfnDeletionPolicy,
   CfnOutput,
+  Fn
 } from 'aws-cdk-lib'
 import * as path from 'path';
 
@@ -25,11 +26,14 @@ export class SeatReservationLambdaStack extends Stack {
       securityGroupName: 'seat-reservation-lambda-sg',
     });
 
-    const vpcEndpoint = new ec2.InterfaceVpcEndpoint(this, 'ApiGatewayVpcEndpoint', {
-      vpc,
-      service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
-      privateDnsEnabled: true,
-    });
+    const vpcEndpoint = ec2.InterfaceVpcEndpoint.fromInterfaceVpcEndpointAttributes(
+      this,
+      'ImportedApiGatewayVpcEndpoint',
+      {
+        vpcEndpointId: Fn.importValue('TicketBookingApiGatewayVpcEndpointId'),
+        port: 443
+      }
+    );
 
     const fn = new lambda.Function(this, 'SeatReservationLambda', {
       functionName: 'seat-reservation-lambda',

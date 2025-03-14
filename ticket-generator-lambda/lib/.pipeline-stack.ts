@@ -10,8 +10,7 @@ import {
   Duration,
   CfnDeletionPolicy,
   CfnOutput,
-} from 'aws-cdk-lib'
-
+} from 'aws-cdk-lib';
 import * as path from 'path';
 
 export class TicketGeneratorLambdaStack extends Stack {
@@ -28,11 +27,14 @@ export class TicketGeneratorLambdaStack extends Stack {
       allowAllOutbound: true,
     });
 
-    const vpcEndpoint = new ec2.InterfaceVpcEndpoint(this, 'ApiGatewayVpcEndpoint', {
-      vpc,
-      service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
-      privateDnsEnabled: true,
-    });
+    const vpcEndpoint = ec2.InterfaceVpcEndpoint.fromInterfaceVpcEndpointAttributes(
+      this,
+      'ImportedApiGatewayVpcEndpoint',
+      {
+        vpcEndpointId: Fn.importValue('TicketBookingApiGatewayVpcEndpointId'),
+        port: 443
+      }
+    );
 
     const documentDbSg = ec2.SecurityGroup.fromSecurityGroupId(this, 'TicketBookingDocumentDbSg', Fn.importValue(`TicketBookingDocumentDbSg`))
     documentDbSg.addIngressRule(
@@ -53,16 +55,16 @@ export class TicketGeneratorLambdaStack extends Stack {
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, 'handler')),
       memorySize: 128,
-      timeout: Duration.millis(60*1000),
+      timeout: Duration.millis(60 * 1000),
     });
 
     const lambdaVersion = new lambda.Version(this, 'LambdaVersion', {
       lambda: fn,
     })
-    ;(lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.deletionPolicy =
-      CfnDeletionPolicy.RETAIN
-    ;(lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.updateReplacePolicy =
-      CfnDeletionPolicy.RETAIN
+      ; (lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.deletionPolicy =
+        CfnDeletionPolicy.RETAIN
+      ; (lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.updateReplacePolicy =
+        CfnDeletionPolicy.RETAIN
 
     const api = new apigw.RestApi(this, 'TicketGeneratorApi', {
       restApiName: 'TicketGeneratorApi',

@@ -8,7 +8,8 @@ import {
   Stack,
   StackProps,
   Duration,
-  CfnOutput
+  CfnOutput,
+  CfnDeletionPolicy
 } from 'aws-cdk-lib';
 import * as path from 'path';
 
@@ -81,6 +82,14 @@ export class PaymentLambdaStack extends Stack {
         PAYMENT_RESPONSE_QUEUE_REGION: process.env.CDK_DEFAULT_REGION || "eu-central-1",
       },
     });
+
+    const lambdaVersion = new lambda.Version(this, 'LambdaVersion', {
+      lambda: fn,
+    })
+    ;(lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.deletionPolicy =
+      CfnDeletionPolicy.RETAIN
+    ;(lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.updateReplacePolicy =
+      CfnDeletionPolicy.RETAIN
 
     fn.addToRolePolicy(
       new iam.PolicyStatement({
