@@ -41,7 +41,7 @@ jobs:
         run: |
             aws cloudformation deploy \
               --stack-name VPCEndpointStack \
-              --template-file vpc-endpoint-stack.yml \
+              --template-file vpc-endpoint/vpc-endpoint-stack.yml \
               --capabilities CAPABILITY_IAM \
               --parameter-overrides \
                 VpcId=vpc-0316cf747ad31953a
