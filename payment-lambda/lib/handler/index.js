@@ -1,4 +1,5 @@
-import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
+const { v4: uuidv4 } = require("uuid");
 
 const paymentResponseQueueUrl = process.env.PAYMENT_RESPONSE_QUEUE_URL;
 const paymentResponseQueueRegion = process.env.PAYMENT_RESPONSE_QUEUE_REGION;
