@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation template to create an API Gateway VPC Endpoint and export it for reuse."
+
+Parameters:
+  VpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Description: "VPC where the API Gateway VPC Endpoint will be created."
+
+  SubnetIds:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Description: "List of subnet IDs where the VPC Endpoint should be deployed."
+
+Resources:
+  ApiGatewayVPCEndpointSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security group for API Gateway VPC Endpoint"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "172.31.0.0/16"
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: "0.0.0.0/0"
+
+  ApiGatewayVpcEndpoint:
+    Type: "AWS::EC2::VPCEndpoint"
+    Properties:
+      VpcId: !Ref VpcId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.execute-api"
+      VpcEndpointType: "Interface"
+      SubnetIds: "subnet-099a8c1d572ae32f5,subnet-04c850fcdb00caf2c"
+      SecurityGroupIds:
+        - !Ref ApiGatewayVPCEndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+Outputs:
+  VpcEndpointId:
+    Description: "VPC Endpoint ID for API Gateway"
+    Value: !Ref ApiGatewayVpcEndpoint
+    Export:
+      Name: "TicketBookingApiGatewayVpcEndpointId"
+
+  VpcEndpointDnsName:
+    Description: "Private DNS name for API Gateway VPC Endpoint"
+    Value: !Select [0, !GetAtt ApiGatewayVpcEndpoint.DnsEntries]
+    Export:
+      Name: "TicketBookingApiGatewayVpcEndpointDns"

@@ -1,4 +1,4 @@
-name: Deploy DocumentDB Stack
+name: Deploy API Gateway VPC Endpoint Stack
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ jobs:
     name: Info
     runs-on: ubuntu-latest
     steps:
-      - name: workflow details
+      - name: Workflow Details
         run: |
           echo "Workflow Name: ${{ github.workflow }}"
           echo "Git Branch: ${{ github.ref }}"
@@ -24,13 +24,13 @@ jobs:
           echo "Github Event: ${{ github.event_name }}"
 
   deploy:
-    name: Deploy AWS CDK Stack
+    name: Deploy API Gateway VPC Endpoint Stack
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: set aws credentials
+      - name: Set AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -40,8 +40,8 @@ jobs:
       - name: Deploy CloudFormation Stack
         run: |
             aws cloudformation deploy \
-              --stack-name TicketBookingDocumentDB \
-              --template-file documentdb/stack.yml \
+              --stack-name VPCEndpointStack \
+              --template-file vpc-endpoint-stack.yml \
               --capabilities CAPABILITY_IAM \
               --parameter-overrides \
                 VpcId=vpc-0316cf747ad31953a

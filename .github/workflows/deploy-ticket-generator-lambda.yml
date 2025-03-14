@@ -1,9 +1,6 @@
 name: Deploy Ticket Generator Lambda Stack
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
