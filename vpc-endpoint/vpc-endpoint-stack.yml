@@ -6,10 +6,6 @@ Parameters:
     Type: "AWS::EC2::VPC::Id"
     Description: "VPC where the API Gateway VPC Endpoint will be created."
 
-  SubnetIds:
-    Type: "List<AWS::EC2::Subnet::Id>"
-    Description: "List of subnet IDs where the VPC Endpoint should be deployed."
-
 Resources:
   ApiGatewayVPCEndpointSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
