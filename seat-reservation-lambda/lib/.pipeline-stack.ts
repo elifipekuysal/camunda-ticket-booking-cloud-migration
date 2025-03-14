@@ -38,7 +38,7 @@ export class SeatReservationLambdaStack extends Stack {
       architecture: lambda.Architecture.ARM_64,
       vpc,
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
         onePerAz: true,
         availabilityZones: ['eu-central-1a'],
       },
