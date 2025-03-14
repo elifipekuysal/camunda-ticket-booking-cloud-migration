@@ -36,6 +36,7 @@ export class SeatReservationLambdaStack extends Stack {
       functionName: 'seat-reservation-lambda',
       runtime: lambda.Runtime.NODEJS_18_X,
       architecture: lambda.Architecture.ARM_64,
+      allowAllOutbound: true,
       vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,

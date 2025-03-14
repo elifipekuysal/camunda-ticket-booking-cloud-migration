@@ -68,6 +68,7 @@ export class PaymentLambdaStack extends Stack {
       functionName: 'payment-lambda',
       runtime: lambda.Runtime.NODEJS_18_X,
       architecture: lambda.Architecture.ARM_64,
+      allowAllOutbound: true,
       vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
