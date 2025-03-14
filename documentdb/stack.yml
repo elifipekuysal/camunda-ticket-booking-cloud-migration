@@ -109,3 +109,8 @@ Outputs:
     Description: "The Security Group ID for DocumentDB"
     Export:
       Name: "TicketBookingDocumentDbSg"
+  DocumentDBSecretArn:
+    Value: !Ref CloudFormationCreatedSecret
+    Description: "AWS Secrets Manager ARN for DocumentDB credentials"
+    Export:
+      Name: "TicketBookingDocumentDbSecretArn"
