@@ -96,8 +96,12 @@ Outputs:
     Value: !Ref DBCluster
   ClusterEndpoint:
     Value: !GetAtt DBCluster.Endpoint
+    Export:
+      Name: "TicketBookingDocumentDbEndpoint"
   ClusterPort:
     Value: !GetAtt DBCluster.Port
+    Export:
+      Name: "TicketBookingDocumentDbPort"
   EngineVersion:
     Value: "4.0.0"
   DocumentDBSecurityGroupId:
