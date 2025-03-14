@@ -52,10 +52,6 @@ jobs:
         run: npm i
         working-directory: payment-lambda
 
-      - name: Bootstrap AWS CDK
-        run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT }}/${{ secrets.AWS_REGION }}
-        working-directory: payment-lambda
-
       - name: Validate CloudFormation Template
         run: cdk synth --app "npx ts-node bin/.pipeline.ts"
         working-directory: payment-lambda
