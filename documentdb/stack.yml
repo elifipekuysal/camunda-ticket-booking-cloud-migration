@@ -47,10 +47,6 @@ Parameters:
     Type: "AWS::EC2::VPC::Id"
     Description: "The VPC where DocumentDB will be deployed"
 
-  AllowedSecurityGroupId:
-    Type: "AWS::EC2::SecurityGroup::Id"
-    Description: "Security Group ID of the Lambda function or other resources that need to access DocumentDB"
-
 Resources:
   DocumentDBSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -61,7 +57,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 27017
           ToPort: 27017
-          SourceSecurityGroupId: !Ref AllowedSecurityGroupId
+          CidrIp: "172.31.0.0/16"  # Allow access from VPC
       SecurityGroupEgress:
         - IpProtocol: "-1"
           CidrIp: "0.0.0.0/0"
