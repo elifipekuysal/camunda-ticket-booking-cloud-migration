@@ -27,7 +27,9 @@ Resources:
       VpcId: !Ref VpcId
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.execute-api"
       VpcEndpointType: "Interface"
-      SubnetIds: "subnet-099a8c1d572ae32f5,subnet-04c850fcdb00caf2c"
+      SubnetIds:
+        - subnet-099a8c1d572ae32f5
+        - subnet-04c850fcdb00caf2c
       SecurityGroupIds:
         - !Ref ApiGatewayVPCEndpointSecurityGroup
       PrivateDnsEnabled: true
