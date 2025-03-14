@@ -4,6 +4,7 @@ import {
   aws_lambda as lambda,
   aws_ec2 as ec2,
   aws_iam as iam,
+  aws_secretsmanager as secretsmanager,
   Stack,
   StackProps,
   Fn,
@@ -41,7 +42,17 @@ export class TicketGeneratorLambdaStack extends Stack {
       securityGroup,
       ec2.Port.tcp(27017),
       `allow access from ticket generator lambda for db cluster access`,
-    )
+    );
+
+    const documentDbEndpoint = Fn.importValue('TicketBookingDocumentDbEndpoint');
+    const documentDbPort = Fn.importValue('TicketBookingDocumentDbPort');
+
+    const documentDbSecretArn = Fn.importValue('TicketBookingDocumentDbSecretArn');
+    const documentDbSecret = secretsmanager.Secret.fromSecretCompleteArn(
+      this,
+      'DocumentDBSecret',
+      documentDbSecretArn
+    );
 
     const fn = new lambda.Function(this, 'TicketGeneratorLambda', {
       functionName: 'ticket-generator-lambda',
@@ -56,7 +67,15 @@ export class TicketGeneratorLambdaStack extends Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, 'handler')),
       memorySize: 128,
       timeout: Duration.millis(60 * 1000),
+      environment: {
+        DOCUMENTDB_ENDPOINT: documentDbEndpoint,
+        DOCUMENTDB_PORT: documentDbPort,
+        DOCUMENTDB_SECRET_ARN: documentDbSecretArn,
+        DOCUMENTDB_CA_FILE: "/var/task/global-bundle.pem"
+      },
     });
+
+    documentDbSecret.grantRead(fn);
 
     const lambdaVersion = new lambda.Version(this, 'LambdaVersion', {
       lambda: fn,
