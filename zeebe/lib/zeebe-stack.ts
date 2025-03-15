@@ -18,6 +18,12 @@ export class ZeebeStack extends Stack {
       isDefault: true
     });
 
+    const ticketBookingCluster = ecs.Cluster.fromClusterAttributes(this, 'TicketBookingEcsCluster', {
+      clusterName: Fn.importValue('TicketBookingEcsClusterName'),
+      clusterArn: Fn.importValue('TicketBookingEcsClusterArn'),
+      vpc
+    });
+
     const securityGroup = new ec2.SecurityGroup(this, 'ZeebeSg', {
       vpc,
       securityGroupName: 'zeebe-sg',
@@ -32,7 +38,7 @@ export class ZeebeStack extends Stack {
       memoryLimitMiB: 2048,
     });
 
-    taskDefinition.addContainer('zeebe', {
+    taskDefinition.addContainer('ZeebeContainer', {
       image: ecs.ContainerImage.fromRegistry('camunda/zeebe:8.4.17'),
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: 'zeebe',
@@ -51,10 +57,8 @@ export class ZeebeStack extends Stack {
       },
     });
 
-    const ticketBookingEcsClusterArn = Fn.importValue('TicketBookingEcsClusterArn');
-    const ticketBookingCluster = ecs.Cluster.fromClusterArn(this, 'TicketBookingEcsCluster', ticketBookingEcsClusterArn);
-
     const service = new ecs.FargateService(this, 'ZeebeService', {
+      serviceName: 'zeebe',
       cluster: ticketBookingCluster,
       taskDefinition,
       desiredCount: 1,
