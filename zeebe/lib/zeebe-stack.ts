@@ -43,7 +43,7 @@ export class ZeebeStack extends Stack {
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: 'zeebe',
         logGroup: new logs.LogGroup(this, 'ZeebeLogGroup', {
-          logGroupName: '/ecs/zeebe',
+          logGroupName: '/ecs/zeebe-engine',
           removalPolicy: RemovalPolicy.DESTROY,
         }),
       }),
