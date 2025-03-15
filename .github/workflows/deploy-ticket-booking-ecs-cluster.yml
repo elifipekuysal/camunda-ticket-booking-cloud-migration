@@ -40,7 +40,7 @@ jobs:
       - name: Deploy CloudFormation Stack
         run: |
           aws cloudformation deploy \
-            --stack-name TicketBookingEcsNetwork \
+            --stack-name TicketBookingEcsCluster \
             --template-file infra/ticket-booking-ecs-cluster/ticket-booking-ecs-cluster-stack.yml \
             --capabilities CAPABILITY_IAM \
             --parameter-overrides \
