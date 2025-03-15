@@ -1,5 +1,4 @@
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
-import { randomUUID } from 'crypto';
 
 const paymentResponseQueueUrl = process.env.PAYMENT_RESPONSE_QUEUE_URL;
 const paymentResponseQueueRegion = process.env.PAYMENT_RESPONSE_QUEUE_REGION;
@@ -18,7 +17,7 @@ async function processMessageAsync(message) {
         console.log(`Processed message ${message.body}`);
         var paymentRequest = JSON.parse(message.body);
 
-        const paymentConfirmationId = randomUUID();
+        const paymentConfirmationId = crypto.randomUUID();
 
         console.log("\n\n [x] Received payment request %s", paymentRequest.paymentRequestId);
 
