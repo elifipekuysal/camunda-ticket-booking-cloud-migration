@@ -1,0 +1,65 @@
+name: Deploy Zeebe ECS Stack
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Select branch to deploy"
+        required: true
+        default: "master"
+
+jobs:
+  info:
+    name: Info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow Details
+        run: |
+          echo "Workflow Name: ${{ github.workflow }}"
+          echo "Git Branch: ${{ github.ref }}"
+          echo "Git SHA: ${{ github.sha }}"
+          echo "GitHub Event: ${{ github.event_name }}"
+
+  deploy:
+    name: Deploy AWS CDK Stack
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install AWS CDK
+        run: npm i -g aws-cdk
+
+      - name: Install dependencies
+        run: npm i
+        working-directory: zeebe-ecs
+
+      - name: Validate CloudFormation Template
+        run: cdk synth --app "npx ts-node bin/zeebe-pipeline.ts"
+        working-directory: zeebe-ecs
+
+      - name: Run Jest Tests
+        run: npm test
+        working-directory: zeebe-ecs
+
+      - name: Deploy Stack
+        run: cdk deploy --app "npx ts-node bin/zeebe-pipeline.ts" --require-approval never
+        working-directory: zeebe-ecs
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
