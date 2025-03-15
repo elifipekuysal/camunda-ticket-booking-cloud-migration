@@ -38,7 +38,7 @@ export class ZeebeStack extends Stack {
       memoryLimitMiB: 2048,
     });
 
-    taskDefinition.addContainer('ZeebeContainer', {
+    taskDefinition.addContainer('zeebe', {
       image: ecs.ContainerImage.fromRegistry('camunda/zeebe:8.4.17'),
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: 'zeebe',
@@ -57,7 +57,7 @@ export class ZeebeStack extends Stack {
       },
     });
 
-    const service = new ecs.FargateService(this, 'ZeebeService', {
+    const ecsService = new ecs.FargateService(this, 'ZeebeService', {
       serviceName: 'zeebe',
       cluster: ticketBookingCluster,
       taskDefinition,
@@ -66,8 +66,21 @@ export class ZeebeStack extends Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
     });
 
+    const scalableTarget = ecsService.autoScaleTaskCount({
+      minCapacity: 1,
+      maxCapacity: 6,
+    });
+
+    scalableTarget.scaleOnCpuUtilization('CpuScaling', {
+      targetUtilizationPercent: 70, // Scale when CPU usage exceeds 570%
+    });
+
+    scalableTarget.scaleOnMemoryUtilization('MemoryScaling', {
+      targetUtilizationPercent: 70, // Scale when Memory usage exceeds 70%
+    });
+
     new CfnOutput(this, 'ZeebeGatewayAddress', {
-      value: service.serviceName + '.service.' + this.region + '.amazonaws.com',
+      value: ecsService.serviceName + '.service.' + props?.env?.region + '.amazonaws.com',
       exportName: 'ZeebeGatewayAddress',
     });
   }

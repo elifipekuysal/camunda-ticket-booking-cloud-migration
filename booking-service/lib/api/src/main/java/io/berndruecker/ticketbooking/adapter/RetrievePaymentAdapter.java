@@ -20,7 +20,6 @@ public class RetrievePaymentAdapter {
 
     private Logger logger = LoggerFactory.getLogger(RetrievePaymentAdapter.class);
 
-    // SQS queue URL (read from application.properties)
     @Value("${aws.sqs.paymentRequestQueueUrl}")
     private String paymentRequestQueueUrl;
 

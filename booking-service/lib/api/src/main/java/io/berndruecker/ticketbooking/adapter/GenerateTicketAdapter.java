@@ -18,9 +18,8 @@ public class GenerateTicketAdapter {
 
   Logger logger = LoggerFactory.getLogger(GenerateTicketAdapter.class);
 
-  // This should be of course injected and depends on the environment.
-  // Hard coded for simplicity here
-  public static String ENDPOINT = "https://vqwsrh2t06.execute-api.eu-central-1.amazonaws.com/default/GenerateTicket";
+  @Value("${ticketbooking.ticketgenerator.lambda.endpoint}")
+  private String endpoint;
 
   @Autowired
   private RestTemplate restTemplate;
@@ -37,7 +36,7 @@ public class GenerateTicketAdapter {
     } else {
       
       // Call REST API, simply returns a ticketId
-      CreateTicketResponse ticket = restTemplate.getForObject(ENDPOINT, CreateTicketResponse.class);  
+      CreateTicketResponse ticket = restTemplate.getForObject(endpoint, CreateTicketResponse.class);  
       logger.info("Succeeded with " + ticket);
 
       return Collections.singletonMap(ProcessConstants.VAR_TICKET_ID, ticket.ticketId);

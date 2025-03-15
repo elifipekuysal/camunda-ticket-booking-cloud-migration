@@ -18,9 +18,8 @@ public class SeatReservationAdapter {
 
   Logger logger = LoggerFactory.getLogger(SeatReservationAdapter.class);
 
-  // This should be of course injected and depends on the environment.
-  // Hard coded for simplicity here
-  public static String ENDPOINT = "https://z3wcvrfje8.execute-api.eu-central-1.amazonaws.com/v1/seat-reservation";
+  @Value("${ticketbooking.seatreservation.lambda.endpoint}")
+  private String endpoint;
 
   @Autowired
   private RestTemplate restTemplate;
@@ -37,7 +36,7 @@ public class SeatReservationAdapter {
     } else {
 
       // Call REST API, simply returns a reservationId
-      SeatReservationResponse reservation = restTemplate.getForObject(ENDPOINT, SeatReservationResponse.class);
+      SeatReservationResponse reservation = restTemplate.getForObject(endpoint, SeatReservationResponse.class);
       logger.info("Succeeded with " + reservation);
 
       return Collections.singletonMap(ProcessConstants.VAR_RESERVATION_ID, reservation.reservationId);
