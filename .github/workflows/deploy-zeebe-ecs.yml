@@ -47,19 +47,19 @@ jobs:
 
       - name: Install dependencies
         run: npm i
-        working-directory: zeebe-ecs
+        working-directory: zeebe
 
       - name: Validate CloudFormation Template
-        run: cdk synth --app "npx ts-node bin/zeebe-pipeline.ts"
-        working-directory: zeebe-ecs
+        run: cdk synth --app "npx ts-node bin/zeebe.ts"
+        working-directory: zeebe
 
       - name: Run Jest Tests
         run: npm test
-        working-directory: zeebe-ecs
+        working-directory: zeebe
 
       - name: Deploy Stack
-        run: cdk deploy --app "npx ts-node bin/zeebe-pipeline.ts" --require-approval never
-        working-directory: zeebe-ecs
+        run: cdk deploy --app "npx ts-node bin/zeebe.ts" --require-approval never
+        working-directory: zeebe
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
           CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
