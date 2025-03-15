@@ -41,7 +41,7 @@ jobs:
         run: |
             aws cloudformation deploy \
               --stack-name TicketBookingDocumentDB \
-              --template-file documentdb/stack.yml \
+              --template-file infra/documentdb/stack.yml \
               --capabilities CAPABILITY_IAM \
               --parameter-overrides \
                 VpcId=vpc-0316cf747ad31953a
