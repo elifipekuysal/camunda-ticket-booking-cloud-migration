@@ -3,11 +3,13 @@ import {
   aws_ec2 as ec2,
   aws_ecs as ecs,
   aws_logs as logs,
+  aws_servicediscovery as service_discovery,
   Stack,
   StackProps,
   Fn,
   CfnOutput,
   RemovalPolicy,
+  Duration
 } from 'aws-cdk-lib';
 
 export class ZeebeStack extends Stack {
@@ -33,6 +35,19 @@ export class ZeebeStack extends Stack {
     securityGroup.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(26500), 'Allow Zeebe clients');
     securityGroup.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(26502), 'Allow Zeebe command API');
 
+    const namespace = new service_discovery.PrivateDnsNamespace(this, 'ZeebeNamespace', {
+      name: 'zeebe.local',
+      vpc,
+    });
+
+    new service_discovery.Service(this, 'ZeebeServiceDiscovery', {
+      namespace,
+      name: 'broker-gateway',
+      dnsRecordType: service_discovery.DnsRecordType.A,
+      dnsTtl: Duration.seconds(10),
+      loadBalancer: false,
+    });
+
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'ZeebeTaskDef', {
       cpu: 1024,
       memoryLimitMiB: 2048,
@@ -54,6 +69,7 @@ export class ZeebeStack extends Stack {
       ],
       environment: {
         'ZEEBE_BROKER_NETWORK_HOST': '0.0.0.0',
+        'ZEEBE_GATEWAY_CLUSTER_HOST': 'broker-gateway.zeebe.local',
       },
     });
 
@@ -64,6 +80,11 @@ export class ZeebeStack extends Stack {
       desiredCount: 1,
       securityGroups: [securityGroup],
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      cloudMapOptions: {
+        name: 'broker-gateway',
+        cloudMapNamespace: namespace,
+        dnsRecordType: service_discovery.DnsRecordType.A,
+      },
     });
 
     const scalableTarget = ecsService.autoScaleTaskCount({
@@ -80,7 +101,7 @@ export class ZeebeStack extends Stack {
     });
 
     new CfnOutput(this, 'ZeebeGatewayAddress', {
-      value: ecsService.serviceName + '.service.' + props?.env?.region + '.amazonaws.com',
+      value: 'broker-gateway.zeebe.local:26500',
       exportName: 'ZeebeGatewayAddress',
     });
   }
