@@ -11,7 +11,6 @@ exports.handler = async (event) => {
     }
 };
 
-// TODO: Having some troubles with the uuid package
 async function processMessageAsync(message) {
     try {
         console.log(`Processed message ${message.body}`);
