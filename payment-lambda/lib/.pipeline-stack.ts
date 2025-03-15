@@ -77,6 +77,7 @@ export class PaymentLambdaStack extends Stack {
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, 'handler')),
       memorySize: 128,
+      timeout: Duration.millis(60*1000),
       environment: {
         PAYMENT_RESPONSE_QUEUE_URL: paymentResponseQueue.queueUrl,
         PAYMENT_RESPONSE_QUEUE_REGION: process.env.CDK_DEFAULT_REGION || "eu-central-1",
