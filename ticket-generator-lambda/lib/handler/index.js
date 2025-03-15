@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+const crypto = require("crypto");
 
 const DOCUMENTDB_SECRET_ARN = process.env.DOCUMENTDB_SECRET_ARN;
 const DOCUMENTDB_ENDPOINT = process.env.DOCUMENTDB_ENDPOINT;
@@ -23,7 +24,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    var ticketId = generateUUID();
+    var ticketId = crypto.randomUUID();
     console.log("\n\n [x] Create Ticket %s", ticketId);
 
     const connectionString = await getDocumentDBConnectionString();
@@ -78,12 +79,4 @@ async function getDocumentDBConnectionString() {
     console.log(JSON.stringify({ error: "Failed to create connection string", details: error.message }));
     throw error;
   }
-}
-
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    let r = Math.random() * 16 | 0;
-    let v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
 }

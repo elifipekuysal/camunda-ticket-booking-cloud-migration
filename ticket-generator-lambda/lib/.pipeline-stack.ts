@@ -64,7 +64,7 @@ export class TicketGeneratorLambdaStack extends Stack {
       },
       securityGroups: [securityGroup],
       handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, 'handler')),
+      code: lambda.Code.fromAsset(path.join(__dirname, 'dist')),
       memorySize: 128,
       timeout: Duration.millis(60 * 1000),
       environment: {
