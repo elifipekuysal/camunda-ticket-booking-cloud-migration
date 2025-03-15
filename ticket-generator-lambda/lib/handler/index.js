@@ -23,10 +23,9 @@ exports.handler = async (event) => {
   }
 
   try {
-    var ticketId = uuidv4();
+    var ticketId = generateUUID();
     console.log("\n\n [x] Create Ticket %s", ticketId);
 
-    // TODO: store ticketId in doc db
     const connectionString = await getDocumentDBConnectionString();
     const client = new MongoClient(connectionString, {
       tls: true,
@@ -34,15 +33,14 @@ exports.handler = async (event) => {
     });
 
     await client.connect();
-    console.log("Connected to DocumentDB");
 
     const db = client.db(DATABASE_NAME);
     const collection = db.collection(COLLECTION_NAME);
 
-    const result = await collection.insertOne({ ticketId, createdAt: new Date() });
-
-    console.log("Ticket stored successfully:", result.insertedId);
+    await collection.insertOne({ ticketId, createdAt: new Date() });
     
+    console.log("Successul :-)");
+
     return {
       statusCode: 200,
       body: JSON.stringify({ ticketId }),
@@ -80,4 +78,12 @@ async function getDocumentDBConnectionString() {
     console.log(JSON.stringify({ error: "Failed to create connection string", details: error.message }));
     throw error;
   }
+}
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    let r = Math.random() * 16 | 0;
+    let v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
