@@ -24,7 +24,7 @@ jobs:
           echo "GitHub Event: ${{ github.event_name }}"
 
   deploy:
-    name: Deploy ECS Network Stack
+    name: Deploy ECS Cluster Stack
     runs-on: ubuntu-latest
 
     steps:
@@ -41,7 +41,7 @@ jobs:
         run: |
           aws cloudformation deploy \
             --stack-name TicketBookingEcsNetwork \
-            --template-file infra/ticket-booking-ecs-cluster/ticket-booking-ecs-cluster-stack.yaml \
+            --template-file infra/ticket-booking-ecs-cluster/ticket-booking-ecs-cluster-stack.yml \
             --capabilities CAPABILITY_IAM \
             --parameter-overrides \
               VpcCIDR=172.31.0.0/16
