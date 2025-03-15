@@ -1,38 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "ECS Cluster and Networking for Ticket Booking Workflow Deployment"
 
-Parameters:
-  VpcCIDR:
-    Type: String
-    Default: "172.31.0.0/16"
-
 Resources:
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: !Ref VpcCIDR
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-
-  PublicSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: "172.31.16.0/20"
-      MapPublicIpOnLaunch: true
-
-  PrivateSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: "172.31.48.0/20"
-      MapPublicIpOnLaunch: false
-
-  InternetGatewayId:
-    Type: String
-    Default: "igw-0999c15a527b79418"
-    Description: "Existing Internet Gateway ID."
-
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -48,15 +17,3 @@ Outputs:
     Value: !GetAtt ECSCluster.Arn
     Export:
       Name: "TicketBookingEcsClusterArn"
-  VpcId:
-    Value: !Ref VPC
-    Export:
-      Name: "ZeebeVpcId"
-  PrivateSubnet:
-    Value: !Ref PrivateSubnet
-    Export:
-      Name: "ZeebePrivateSubnet"
-  PublicSubnet:
-    Value: !Ref PublicSubnet
-    Export:
-      Name: "ZeebePublicSubnet"
