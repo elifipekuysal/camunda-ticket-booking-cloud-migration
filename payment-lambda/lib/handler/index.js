@@ -17,7 +17,7 @@ async function processMessageAsync(message) {
         console.log(`Processed message ${message.body}`);
         var paymentRequest = JSON.parse(message.body);
 
-        const paymentConfirmationId = crypto.randomUUID();
+        const paymentConfirmationId = generateUUID();
 
         console.log("\n\n [x] Received payment request %s", paymentRequest.paymentRequestId);
 
@@ -38,4 +38,12 @@ async function processMessageAsync(message) {
         console.error("An error occurred");
         throw err;
     }
+}
+
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        let r = Math.random() * 16 | 0;
+        let v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
