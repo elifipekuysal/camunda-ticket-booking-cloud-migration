@@ -4,7 +4,8 @@ import {
   aws_ecs as ecs,
   aws_logs as logs,
   aws_elasticloadbalancingv2 as elbv2,
-  aws_ecr as ecr,
+  aws_sqs as sqs,
+  aws_iam as iam,
   Stack,
   StackProps,
   Fn,
@@ -76,8 +77,8 @@ export class BookingServiceStack extends Stack {
       environment: {
         'ZEEBE_CLIENT_BROKER_GATEWAY_ADDRESS': Fn.importValue('ZeebeGatewayAddress'),
         'TICKETBOOKING_SEATRESERVATION_LAMBDA_ENDPOINT': Fn.importValue('SeatReservationRestApiUrl'),
-        'AWS_SQS_PAYMENTREQUESTQUEUEURL': Fn.importValue('PaymentRequestQueueUrl'),
-        'AWS_SQS_PAYMENTRESPONSEQUEUEURL': Fn.importValue('PaymentResponseQueueUrl'),
+        'AWS_SQS_PAYMENT_REQUEST_QUEUE_URL': Fn.importValue('PaymentRequestQueueUrl'),
+        'AWS_SQS_PAYMENT_RESPONSE_QUEUE_URL': Fn.importValue('PaymentResponseQueueUrl'),
         'TICKETBOOKING_TICKETGENERATOR_LAMBDA_ENDPOINT': Fn.importValue('TicketGenerationRestApiUrl'),
         'AWS_REGION': props?.env?.region || 'eu-central-1',
       },
@@ -117,6 +118,26 @@ export class BookingServiceStack extends Stack {
     scalableTarget.scaleOnMemoryUtilization('MemoryScaling', {
       targetUtilizationPercent: 70, // Scale when Memory usage exceeds 70%
     });
+
+    const paymentRequestQueue = sqs.Queue.fromQueueArn(this, 'PaymentRequestQueue', Fn.importValue('PaymentRequestQueueArn'));
+    
+    ecsService.taskDefinition.taskRole.addToPrincipalPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['sqs:SendMessage'],
+        resources: [paymentRequestQueue.queueArn],
+      })
+    );
+
+    const paymentResponseQueue = sqs.Queue.fromQueueArn(this, 'PaymentResponseQueue', Fn.importValue('PaymentResponseQueueArn')); 
+
+    ecsService.taskDefinition.taskRole.addToPrincipalPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:GetQueueAttributes'],
+        resources: [paymentResponseQueue.queueArn],
+      })
+    );
 
     new CfnOutput(this, 'BookingServiceName', {
       value: taskDefinition.taskDefinitionArn,
