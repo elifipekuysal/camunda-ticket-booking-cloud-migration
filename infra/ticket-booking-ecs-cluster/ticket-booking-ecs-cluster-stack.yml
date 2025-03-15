@@ -5,7 +5,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: "TicketBookingEcsCluster"
+      ClusterName: "ticket-booking"
 
 Outputs:
   ClusterName:
