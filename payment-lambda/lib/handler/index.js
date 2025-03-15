@@ -1,5 +1,5 @@
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from 'crypto';
 
 const paymentResponseQueueUrl = process.env.PAYMENT_RESPONSE_QUEUE_URL;
 const paymentResponseQueueRegion = process.env.PAYMENT_RESPONSE_QUEUE_REGION;
@@ -12,15 +12,17 @@ exports.handler = async (event) => {
     }
 };
 
+// TODO: Having some troubles with the uuid package
 async function processMessageAsync(message) {
     try {
         console.log(`Processed message ${message.body}`);
-        var paymentRequestId = message.body.toString();
-        var paymentConfirmationId = uuidv4();
+        var paymentRequest = JSON.parse(message.body);
 
-        console.log("\n\n [x] Received payment request %s", paymentRequestId);
+        const paymentConfirmationId = randomUUID();
 
-        var outputMessage = '{"paymentRequestId": "' + paymentRequestId + '", "paymentConfirmationId": "' + paymentConfirmationId + '"}';
+        console.log("\n\n [x] Received payment request %s", paymentRequest.paymentRequestId);
+
+        var outputMessage = '{"paymentRequestId": "' + paymentRequest.paymentRequestId + '", "paymentConfirmationId": "' + paymentConfirmationId + '"}';
 
         const params = {
             QueueUrl: paymentResponseQueueUrl,

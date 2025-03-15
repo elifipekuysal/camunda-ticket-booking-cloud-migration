@@ -75,15 +75,7 @@ export class PaymentLambdaStack extends Stack {
       },
       securityGroups: [securityGroup],
       handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, "handler"), {
-        bundling: {
-          image: lambda.Runtime.NODEJS_18_X.bundlingImage,
-          command: [
-            "bash", "-c",
-            "npm install && cp -r . /asset-output"
-          ],
-        },
-      }),
+      code: lambda.Code.fromAsset(path.join(__dirname, 'handler')),
       memorySize: 128,
       environment: {
         PAYMENT_RESPONSE_QUEUE_URL: paymentResponseQueue.queueUrl,
