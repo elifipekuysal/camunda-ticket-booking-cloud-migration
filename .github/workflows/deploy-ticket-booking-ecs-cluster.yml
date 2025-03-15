@@ -1,0 +1,47 @@
+name: Deploy Ticket Booking ECS Cluster
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Select branch to deploy"
+        required: true
+        default: "master"
+
+jobs:
+  info:
+    name: Info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow Details
+        run: |
+          echo "Workflow Name: ${{ github.workflow }}"
+          echo "Git Branch: ${{ github.ref }}"
+          echo "Git SHA: ${{ github.sha }}"
+          echo "GitHub Event: ${{ github.event_name }}"
+
+  deploy:
+    name: Deploy ECS Network Stack
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy CloudFormation Stack
+        run: |
+          aws cloudformation deploy \
+            --stack-name TicketBookingEcsNetwork \
+            --template-file infra/ticket-booking-ecs-cluster/ticket-booking-ecs-cluster-stack.yaml \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides \
+              VpcCIDR=172.31.0.0/16
