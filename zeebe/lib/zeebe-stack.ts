@@ -35,19 +35,6 @@ export class ZeebeStack extends Stack {
     securityGroup.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(26500), 'Allow Zeebe clients');
     securityGroup.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(26502), 'Allow Zeebe command API');
 
-    const namespace = new service_discovery.PrivateDnsNamespace(this, 'ZeebeNamespace', {
-      name: 'zeebe.local',
-      vpc,
-    });
-
-    new service_discovery.Service(this, 'ZeebeServiceDiscovery', {
-      namespace,
-      name: 'broker-gateway',
-      dnsRecordType: service_discovery.DnsRecordType.A,
-      dnsTtl: Duration.seconds(10),
-      loadBalancer: false,
-    });
-
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'ZeebeTaskDef', {
       cpu: 1024,
       memoryLimitMiB: 2048,
@@ -73,17 +60,23 @@ export class ZeebeStack extends Stack {
       },
     });
 
+    const namespace = new service_discovery.PrivateDnsNamespace(this, 'ZeebeNamespace', {
+      name: 'ticket-booking.local',
+      vpc,
+    });
+
     const ecsService = new ecs.FargateService(this, 'ZeebeService', {
-      serviceName: 'zeebe',
+      serviceName: 'zeebe-engine',
       cluster: ticketBookingCluster,
       taskDefinition,
       desiredCount: 1,
       securityGroups: [securityGroup],
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       cloudMapOptions: {
-        name: 'broker-gateway',
         cloudMapNamespace: namespace,
+        name: 'zeebe',
         dnsRecordType: service_discovery.DnsRecordType.A,
+        dnsTtl: Duration.seconds(10),
       },
     });
 
@@ -93,11 +86,11 @@ export class ZeebeStack extends Stack {
     });
 
     scalableTarget.scaleOnCpuUtilization('CpuScaling', {
-      targetUtilizationPercent: 70, // Scale when CPU usage exceeds 570%
+      targetUtilizationPercent: 70,
     });
 
     scalableTarget.scaleOnMemoryUtilization('MemoryScaling', {
-      targetUtilizationPercent: 70, // Scale when Memory usage exceeds 70%
+      targetUtilizationPercent: 70, 
     });
 
     new CfnOutput(this, 'ZeebeGatewayAddress', {
