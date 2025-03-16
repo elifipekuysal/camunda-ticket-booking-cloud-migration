@@ -36,8 +36,8 @@ export class ZeebeStack extends Stack {
     securityGroup.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(26502), 'Allow Zeebe command API');
 
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'ZeebeTaskDef', {
-      cpu: 1024,
-      memoryLimitMiB: 2048,
+      cpu: 2048,
+      memoryLimitMiB: 4096,
     });
 
     taskDefinition.addContainer('zeebe', {
