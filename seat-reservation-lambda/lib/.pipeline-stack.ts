@@ -70,12 +70,12 @@ export class SeatReservationLambdaStack extends Stack {
       policy: new iam.PolicyDocument({
         statements: [
           new iam.PolicyStatement({
-            effect: iam.Effect.DENY,
+            effect: iam.Effect.ALLOW,
             principals: [new iam.AnyPrincipal()],
             actions: ['execute-api:Invoke'],
             resources: ['*'],
             conditions: {
-              'StringNotEquals': {
+              'StringEquals': {
                 'aws:SourceVpc': vpc.vpcId,
               },
             },
@@ -85,7 +85,7 @@ export class SeatReservationLambdaStack extends Stack {
     });
 
     const reservationResource = api.root.addResource('seat-reservation');
-    reservationResource.addMethod('POST', new apigw.LambdaIntegration(fn));
+    reservationResource.addMethod('POST', new apigw.LambdaIntegration(fn), {authorizationType: apigw.AuthorizationType.NONE,});
 
     new CfnOutput(this, 'ApiGatewayUrlOutput', {
       value: api.url,
