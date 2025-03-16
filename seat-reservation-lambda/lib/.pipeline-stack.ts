@@ -76,7 +76,7 @@ export class SeatReservationLambdaStack extends Stack {
             resources: ['*'],
             conditions: {
               'StringEquals': {
-                'aws:SourceVpc': vpc.vpcId,
+                'aws:VpcSourceIp': vpc.vpcId,
               },
             },
           }),
