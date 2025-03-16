@@ -22,7 +22,6 @@ export class BookingServiceStack extends Stack {
       isDefault: true
     });
 
-    const privateSubnetIds = ['subnet-099a8c1d572ae32f5', 'subnet-04c850fcdb00caf2c'];
     const publicSubnetIds = ['subnet-02f74f86f368a3d9c', 'subnet-0d69807077cc14965'];
 
     const ticketBookingCluster = ecs.Cluster.fromClusterAttributes(this, 'TicketBookingEcsCluster', {
@@ -97,7 +96,7 @@ export class BookingServiceStack extends Stack {
       taskDefinition,
       desiredCount: 1,
       securityGroups: [securityGroup],
-      vpcSubnets: { subnets: privateSubnetIds.map(id => ec2.Subnet.fromSubnetId(this, `Subnet${id}`, id)) },
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
     });
     ecsService.attachToApplicationTargetGroup(targetGroup);
