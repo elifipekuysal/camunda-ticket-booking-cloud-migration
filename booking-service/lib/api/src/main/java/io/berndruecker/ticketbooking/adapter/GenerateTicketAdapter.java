@@ -35,7 +35,8 @@ public class GenerateTicketAdapter {
       throw new IOException("[Simulated] Could not connect to HTTP server");
       
     } else {
-      
+      logger.info("Ticket generator lambda endpoint: " + endpoint);
+
       // Call REST API, simply returns a ticketId
       CreateTicketResponse ticket = restTemplate.getForObject(endpoint, CreateTicketResponse.class);  
       logger.info("Succeeded with " + ticket);

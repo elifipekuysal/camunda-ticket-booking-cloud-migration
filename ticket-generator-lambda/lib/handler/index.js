@@ -6,15 +6,11 @@ const DOCUMENTDB_ENDPOINT = process.env.DOCUMENTDB_ENDPOINT;
 const DOCUMENTDB_PORT = process.env.DOCUMENTDB_PORT;
 const DOCUMENTDB_CA_FILE = process.env.DOCUMENTDB_CA_FILE;
 
-const DATABASE_NAME = "TicketBooking";
+const DATABASE_NAME = "ticket-booking";
 const COLLECTION_NAME = "tickets";
 
 exports.handler = async (event) => {
-  const { httpMethod, body } = event;
   console.log("Generate tickets now...");
-
-  console.log(`httpMethod: ${httpMethod}`);
-  console.log(`body: ${JSON.stringify(body)}`);
 
   if (httpMethod !== "GET") {
     return {

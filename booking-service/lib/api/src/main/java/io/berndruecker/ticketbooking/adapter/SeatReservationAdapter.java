@@ -35,6 +35,7 @@ public class SeatReservationAdapter {
       throw new IOException("[Simulated] Could not connect to HTTP server");
 
     } else {
+      logger.info("Seat reservation lambda endpoint: " + endpoint);
 
       // Call REST API, simply returns a reservationId
       SeatReservationResponse reservation = restTemplate.getForObject(endpoint, SeatReservationResponse.class);

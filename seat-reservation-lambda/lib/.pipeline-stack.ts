@@ -85,7 +85,7 @@ export class SeatReservationLambdaStack extends Stack {
     });
 
     const reservationResource = api.root.addResource('seat-reservation');
-    reservationResource.addMethod('POST', new apigw.LambdaIntegration(fn), { authorizationType: apigw.AuthorizationType.NONE, });
+    reservationResource.addMethod('GET', new apigw.LambdaIntegration(fn), { authorizationType: apigw.AuthorizationType.NONE, });
 
     new CfnOutput(this, 'ApiGatewayUrlOutput', {
       value: `${api.url}/seat-reservation`,
