@@ -113,10 +113,10 @@ export class TicketGeneratorLambdaStack extends Stack {
     });
 
     const reservationResource = api.root.addResource('ticket');
-    reservationResource.addMethod('GET', new apigw.LambdaIntegration(fn), {authorizationType: apigw.AuthorizationType.NONE,});
+    reservationResource.addMethod('GET', new apigw.LambdaIntegration(fn), { authorizationType: apigw.AuthorizationType.NONE, });
 
     new CfnOutput(this, 'ApiGatewayUrlOutput', {
-      value: api.url,
+      value: `${api.url}/ticket`,
       description: 'The endpoint for the API Gateway triggering the ticket-generator-lambda function (only accessible within VPC)',
       exportName: 'TicketGenerationRestApiUrl'
     });

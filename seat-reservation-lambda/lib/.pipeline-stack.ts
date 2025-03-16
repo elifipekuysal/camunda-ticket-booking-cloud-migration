@@ -47,16 +47,16 @@ export class SeatReservationLambdaStack extends Stack {
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, 'handler')),
       memorySize: 128,
-      timeout: Duration.millis(60*1000),
+      timeout: Duration.millis(60 * 1000),
     });
 
     const lambdaVersion = new lambda.Version(this, 'LambdaVersion', {
       lambda: fn,
     })
-    ;(lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.deletionPolicy =
-      CfnDeletionPolicy.RETAIN
-    ;(lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.updateReplacePolicy =
-      CfnDeletionPolicy.RETAIN
+      ; (lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.deletionPolicy =
+        CfnDeletionPolicy.RETAIN
+      ; (lambdaVersion.node.tryFindChild('Resource') as lambda.CfnVersion).cfnOptions.updateReplacePolicy =
+        CfnDeletionPolicy.RETAIN
 
     const api = new apigw.RestApi(this, 'SeatReservationApi', {
       restApiName: 'SeatReservationApi',
@@ -85,10 +85,10 @@ export class SeatReservationLambdaStack extends Stack {
     });
 
     const reservationResource = api.root.addResource('seat-reservation');
-    reservationResource.addMethod('POST', new apigw.LambdaIntegration(fn), {authorizationType: apigw.AuthorizationType.NONE,});
+    reservationResource.addMethod('POST', new apigw.LambdaIntegration(fn), { authorizationType: apigw.AuthorizationType.NONE, });
 
     new CfnOutput(this, 'ApiGatewayUrlOutput', {
-      value: api.url,
+      value: `${api.url}/seat-reservation`,
       description: 'The endpoint for the API Gateway triggering the seat-reservation-lambda function (only accessible within VPC)',
       exportName: 'SeatReservationRestApiUrl'
     });
