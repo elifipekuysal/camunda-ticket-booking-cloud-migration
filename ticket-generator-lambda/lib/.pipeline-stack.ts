@@ -46,13 +46,7 @@ export class TicketGeneratorLambdaStack extends Stack {
 
     const documentDbEndpoint = Fn.importValue('TicketBookingDocumentDbEndpoint');
     const documentDbPort = Fn.importValue('TicketBookingDocumentDbPort');
-
     const documentDbSecretArn = Fn.importValue('TicketBookingDocumentDbSecretArn');
-    const documentDbSecret = secretsmanager.Secret.fromSecretCompleteArn(
-      this,
-      'DocumentDBSecret',
-      documentDbSecretArn
-    );
 
     const fn = new lambda.Function(this, 'TicketGeneratorLambda', {
       functionName: 'ticket-generator-lambda',
@@ -75,7 +69,14 @@ export class TicketGeneratorLambdaStack extends Stack {
       },
     });
 
-    documentDbSecret.grantRead(fn);
+    fn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'secretsmanager:GetSecretValue',
+        'secretsmanager:DescribeSecret'
+      ],
+      resources: [documentDbSecretArn],
+    }));
 
     const lambdaVersion = new lambda.Version(this, 'LambdaVersion', {
       lambda: fn,
