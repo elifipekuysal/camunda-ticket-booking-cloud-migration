@@ -94,7 +94,7 @@ export class ZeebeStack extends Stack {
     });
 
     new CfnOutput(this, 'ZeebeGatewayAddress', {
-      value: 'broker-gateway.zeebe.local:26500',
+      value: 'zeebe.ticket-booking.local:26500',
       exportName: 'ZeebeGatewayAddress',
     });
   }
