@@ -101,12 +101,7 @@ export class TicketGeneratorLambdaStack extends Stack {
             effect: iam.Effect.ALLOW,
             principals: [new iam.AnyPrincipal()],
             actions: ['execute-api:Invoke'],
-            resources: ['*'],
-            conditions: {
-              'StringEquals': {
-                'aws:VpcSourceIp': vpc.vpcId,
-              },
-            },
+            resources: ['execute-api:/*/GET/ticket'],
           }),
         ],
       }),
@@ -116,7 +111,7 @@ export class TicketGeneratorLambdaStack extends Stack {
     reservationResource.addMethod('GET', new apigw.LambdaIntegration(fn), { authorizationType: apigw.AuthorizationType.NONE, });
 
     new CfnOutput(this, 'ApiGatewayUrlOutput', {
-      value: `${api.url}/ticket`,
+      value: `${api.url}ticket`,
       description: 'The endpoint for the API Gateway triggering the ticket-generator-lambda function (only accessible within VPC)',
       exportName: 'TicketGenerationRestApiUrl'
     });

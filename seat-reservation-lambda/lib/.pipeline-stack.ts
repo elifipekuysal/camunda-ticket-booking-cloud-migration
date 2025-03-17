@@ -73,12 +73,7 @@ export class SeatReservationLambdaStack extends Stack {
             effect: iam.Effect.ALLOW,
             principals: [new iam.AnyPrincipal()],
             actions: ['execute-api:Invoke'],
-            resources: ['*'],
-            conditions: {
-              'StringEquals': {
-                'aws:VpcSourceIp': vpc.vpcId,
-              },
-            },
+            resources: ['execute-api:/*/GET/seat-reservation'],
           }),
         ],
       }),
