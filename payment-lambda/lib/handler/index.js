@@ -33,7 +33,7 @@ async function processMessageAsync(message) {
             )
           );
 
-        console.log(" [x] Sent payment response %s", outputMessage);
+        console.log(" [x] Sent payment response %s", JSON.stringify(paymentConfirmationResponse));
     } catch (err) {
         console.error("An error occurred");
         throw err;
