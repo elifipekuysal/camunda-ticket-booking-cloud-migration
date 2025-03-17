@@ -31,10 +31,8 @@ public class RetrievePaymentAdapter {
     public Map<String, Object> retrievePayment(final ActivatedJob job) {
         logger.info("Sending message to retrieve payment: " + job);
 
-        // Generate paymentRequestId
         String paymentRequestId = UUID.randomUUID().toString();
 
-        // Sending messages to SQS
         SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
                 .queueUrl(paymentRequestQueueUrl)
                 .messageBody("{\"paymentRequestId\": \"" + paymentRequestId + "\"}")

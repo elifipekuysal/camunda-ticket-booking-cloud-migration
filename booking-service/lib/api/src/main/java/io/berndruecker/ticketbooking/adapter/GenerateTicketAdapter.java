@@ -30,14 +30,10 @@ public class GenerateTicketAdapter {
     logger.info("Generate ticket via REST [" + job + "]");
 
     if ("ticket".equalsIgnoreCase((String)job.getVariablesAsMap().get(ProcessConstants.VAR_SIMULATE_BOOKING_FAILURE))) {
-
-      // Simulate a network problem to the HTTP server
       throw new IOException("[Simulated] Could not connect to HTTP server");
-      
     } else {
       logger.info("Ticket generator lambda endpoint: " + endpoint);
-
-      // Call REST API, simply returns a ticketId
+      
       CreateTicketResponse ticket = restTemplate.getForObject(endpoint, CreateTicketResponse.class);  
       logger.info("Succeeded with " + ticket);
 

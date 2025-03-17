@@ -30,14 +30,8 @@ public class SeatReservationAdapter {
     logger.info("Reserve seats via REST [" + job + "]");
 
     if ("seats".equalsIgnoreCase((String) job.getVariablesAsMap().get(ProcessConstants.VAR_SIMULATE_BOOKING_FAILURE))) {
-
-      // Simulate a network problem to the HTTP server
       throw new IOException("[Simulated] Could not connect to HTTP server");
-
     } else {
-      logger.info("Seat reservation lambda endpoint: " + endpoint);
-
-      // Call REST API, simply returns a reservationId
       SeatReservationResponse reservation = restTemplate.getForObject(endpoint, SeatReservationResponse.class);
       logger.info("Succeeded with " + reservation);
 

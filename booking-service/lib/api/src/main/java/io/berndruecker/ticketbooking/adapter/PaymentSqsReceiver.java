@@ -37,39 +37,33 @@ public class PaymentSqsReceiver {
     this.sqsClient = sqsClient;
   }
 
-  // Periodically poll SQS (executed every 5 seconds)
-  @Scheduled(fixedRate = 5000)
+  @Scheduled(fixedRate = 1000)
   @Transactional
   public void pollSqsMessages() {
-    // 1. Get messages from SQS
     ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
             .queueUrl(paymentResponseQueueUrl)
             .maxNumberOfMessages(4)
-            .waitTimeSeconds(2)
+            .waitTimeSeconds(1)
             .build();
 
     List<Message> messages = sqsClient.receiveMessage(receiveMessageRequest).messages();
 
     for (Message message : messages) {
       try {
-        // 2. Parsing the message
+        logger.info("PaymentSqsReceiver - Received: " + message.body());
+
         PaymentResponseMessage paymentResponse = objectMapper.readValue(message.body(), PaymentResponseMessage.class);
-        logger.info("Received: " + paymentResponse);
 
-        // 3. Send a message to Zeebe Workflow
         client.newPublishMessageCommand()
-                .messageName("msg-payment-received")
-                .correlationKey(paymentResponse.paymentRequestId)
-                .variables(Collections.singletonMap("paymentConfirmationId", paymentResponse.paymentConfirmationId))
-                .send()
-                .join();
+        .messageName("msg-payment-received")
+        .correlationKey(paymentResponse.paymentRequestId)
+        .variables(Collections.singletonMap("paymentConfirmationId", paymentResponse.paymentConfirmationId))
+        .send().join();
 
-        // 4. Delete the SQS message after successful processing
         sqsClient.deleteMessage(DeleteMessageRequest.builder()
                 .queueUrl(paymentResponseQueueUrl)
                 .receiptHandle(message.receiptHandle())
                 .build());
-
       } catch (Exception e) {
         logger.error("Error processing SQS message", e);
       }

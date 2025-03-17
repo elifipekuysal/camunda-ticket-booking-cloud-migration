@@ -11,7 +11,7 @@ const COLLECTION_NAME = "tickets";
 
 exports.handler = async (event) => {
   console.log("Generate tickets now...");
-  
+
   const { httpMethod } = event;
 
   if (httpMethod !== "GET") {
@@ -26,6 +26,8 @@ exports.handler = async (event) => {
     console.log("\n\n [x] Create Ticket %s", ticketId);
 
     const connectionString = await getDocumentDBConnectionString();
+    console.log(`Document DB - connection string: ${connectionString}`);
+
     const client = new MongoClient(connectionString, {
       tls: true,
       tlsCAFile: DOCUMENTDB_CA_FILE,
@@ -37,12 +39,11 @@ exports.handler = async (event) => {
     const collection = db.collection(COLLECTION_NAME);
 
     await collection.insertOne({ ticketId, createdAt: new Date() });
-    
-    console.log("Successul :-)");
 
+    console.log("Successul :-)");
     return {
       statusCode: 200,
-      body: JSON.stringify({ ticketId }),
+      body: JSON.stringify({ ticketId: ticketId }),
     };
   } catch (error) {
     console.error("Error processing request:", error);
@@ -53,7 +54,9 @@ exports.handler = async (event) => {
   }
 };
 
-async function getSecret() {
+async function getDocumentDbSecrets() {
+  console.log("Getting Document DB credentials");
+
   try {
     const secretData = await secretsManager.getSecretValue({ SecretId: DOCUMENTDB_SECRET_ARN }).promise();
     if (!secretData || !secretData.SecretString) {
@@ -67,8 +70,10 @@ async function getSecret() {
 }
 
 async function getDocumentDBConnectionString() {
+  console.log("Generating Document DB connection");
+
   try {
-    const credentials = await getSecret();
+    const credentials = await getDocumentDbSecrets();
     const username = credentials.username;
     const password = credentials.password;
 

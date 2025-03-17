@@ -17,21 +17,21 @@ async function processMessageAsync(message) {
         console.log(`Processed message ${message.body}`);
         var paymentRequest = JSON.parse(message.body);
 
-        const paymentConfirmationId = crypto.randomUUID();
-
         console.log("\n\n [x] Received payment request %s", paymentRequest.paymentRequestId);
 
-        var outputMessage = '{"paymentRequestId": "' + paymentRequest.paymentRequestId + '", "paymentConfirmationId": "' + paymentConfirmationId + '"}';
+        const paymentConfirmationResponse = {
+            paymentRequestId: paymentRequest.paymentRequestId,
+            paymentConfirmationId: crypto.randomUUID()
+        }
 
-        const params = {
-            QueueUrl: paymentResponseQueueUrl,
-            MessageBody: JSON.stringify({
-                message: outputMessage,
-                timestamp: new Date().toISOString()
-            }),
-        };
-
-        await sqsClient.send(new SendMessageCommand(params));
+        await sqsClient.send(
+            new SendMessageCommand(
+              {
+                MessageBody: JSON.stringify(paymentConfirmationResponse),
+                QueueUrl: paymentResponseQueueUrl
+              }
+            )
+          );
 
         console.log(" [x] Sent payment response %s", outputMessage);
     } catch (err) {
