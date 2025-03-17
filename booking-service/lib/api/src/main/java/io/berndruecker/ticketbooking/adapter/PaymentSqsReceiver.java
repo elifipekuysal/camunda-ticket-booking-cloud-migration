@@ -5,15 +5,15 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import software.amazon.awssdk.services.sqs.SqsClient;
 
+import software.amazon.awssdk.services.sqs.SqsClient;
+import io.awspring.cloud.messaging.listener.SqsMessageDeletionPolicy;
+import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import io.camunda.zeebe.client.ZeebeClient;
 
 @Component
@@ -28,19 +28,24 @@ public class PaymentSqsReceiver {
     this.client = client;
     this.objectMapper = objectMapper;
   }
-
-  @SqsListener("${aws.sqs.paymentResponseQueueUrl}")
+  
+  @SqsListener(value = "${aws.sqs.paymentResponseQueueUrl}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
   @Transactional
-  public void receiveMessage(String paymentResponseString) throws JsonMappingException, JsonProcessingException {
-    PaymentResponseMessage paymentResponse = objectMapper.readValue(paymentResponseString, PaymentResponseMessage.class);
-    logger.info("Received " + paymentResponse);
+  public void receiveMessage(String message) {
+    logger.info("PaymentSqsReceiver - Received message: " + message);
     
-    client.newPublishMessageCommand()
-        .messageName("msg-payment-received")
-        .correlationKey(paymentResponse.paymentRequestId)
-        .variables(Collections.singletonMap("paymentConfirmationId", paymentResponse.paymentConfirmationId))
-        .send()
-        .join();
+    try {
+      PaymentResponseMessage paymentResponse = objectMapper.readValue(message, PaymentResponseMessage.class);
+
+      client.newPublishMessageCommand()
+              .messageName("msg-payment-received")
+              .correlationKey(paymentResponse.paymentRequestId)
+              .variables(Collections.singletonMap("paymentConfirmationId", paymentResponse.paymentConfirmationId))
+              .send()
+              .join();
+    } catch (Exception e) {
+      logger.error("Error processing SQS message", e);
+    }
   }
 
   public static class PaymentResponseMessage {
