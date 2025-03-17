@@ -1,4 +1,8 @@
 exports.handler = async (event) => {
+    console.log("Reserve seats now...");
+
+    const { httpMethod } = event;
+
     if (httpMethod !== "GET") {
         return {
             statusCode: 405,

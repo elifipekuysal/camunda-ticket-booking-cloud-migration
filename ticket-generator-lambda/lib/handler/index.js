@@ -11,6 +11,8 @@ const COLLECTION_NAME = "tickets";
 
 exports.handler = async (event) => {
   console.log("Generate tickets now...");
+  
+  const { httpMethod } = event;
 
   if (httpMethod !== "GET") {
     return {

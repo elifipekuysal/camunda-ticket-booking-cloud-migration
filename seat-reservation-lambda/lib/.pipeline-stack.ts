@@ -83,7 +83,7 @@ export class SeatReservationLambdaStack extends Stack {
     reservationResource.addMethod('GET', new apigw.LambdaIntegration(fn), { authorizationType: apigw.AuthorizationType.NONE, });
 
     new CfnOutput(this, 'ApiGatewayUrlOutput', {
-      value: `${api.url}/seat-reservation`,
+      value: `${api.url}seat-reservation`,
       description: 'The endpoint for the API Gateway triggering the seat-reservation-lambda function (only accessible within VPC)',
       exportName: 'SeatReservationRestApiUrl'
     });
