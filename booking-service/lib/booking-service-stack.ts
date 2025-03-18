@@ -45,6 +45,7 @@ export class BookingServiceStack extends Stack {
     albSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'Allow HTTP traffic');
 
     const alb = new elbv2.ApplicationLoadBalancer(this, 'BookingServiceALB', {
+      loadBalancerName: 'ticket-booking-alb',
       vpc,
       internetFacing: true,
       securityGroup: albSecurityGroup,
@@ -56,11 +57,12 @@ export class BookingServiceStack extends Stack {
     });
 
     const targetGroup = new elbv2.ApplicationTargetGroup(this, 'BookingServiceTargetGroup', {
+      targetGroupName: 'ticket-booking-alb-group',
       vpc,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: 8080,
       targetType: elbv2.TargetType.IP,
-      healthCheck: { path: '/' },
+      healthCheck: { path: '/actuator/health' },
     });
 
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'BookingServiceTaskDef', {
@@ -119,7 +121,7 @@ export class BookingServiceStack extends Stack {
     });
 
     const paymentRequestQueue = sqs.Queue.fromQueueArn(this, 'PaymentRequestQueue', Fn.importValue('PaymentRequestQueueArn'));
-    
+
     ecsService.taskDefinition.taskRole.addToPrincipalPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -128,7 +130,7 @@ export class BookingServiceStack extends Stack {
       })
     );
 
-    const paymentResponseQueue = sqs.Queue.fromQueueArn(this, 'PaymentResponseQueue', Fn.importValue('PaymentResponseQueueArn')); 
+    const paymentResponseQueue = sqs.Queue.fromQueueArn(this, 'PaymentResponseQueue', Fn.importValue('PaymentResponseQueueArn'));
 
     ecsService.taskDefinition.taskRole.addToPrincipalPolicy(
       new iam.PolicyStatement({
