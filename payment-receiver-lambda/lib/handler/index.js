@@ -1,8 +1,6 @@
 const crypto = require("crypto");
 
 exports.handler = async (event) => {
-    console.log("Receive payments now...");
-
     const { httpMethod, queryStringParameters } = event;
 
     if (httpMethod !== "GET") {

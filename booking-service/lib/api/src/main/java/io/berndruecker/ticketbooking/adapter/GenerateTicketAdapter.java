@@ -27,15 +27,13 @@ public class GenerateTicketAdapter {
 
   @JobWorker(type = "generate-ticket")
   public Map<String, Object> callGenerateTicketRestService(final ActivatedJob job) throws IOException {
-    logger.info("Generate ticket via REST [" + job + "]");
+    logger.info("GenerateTicketAdapter - Generate ticket via REST [" + job + "]");
 
     if ("ticket".equalsIgnoreCase((String)job.getVariablesAsMap().get(ProcessConstants.VAR_SIMULATE_BOOKING_FAILURE))) {
       throw new IOException("[Simulated] Could not connect to HTTP server");
-    } else {
-      logger.info("Ticket generator lambda endpoint: " + endpoint);
-      
+    } else {      
       CreateTicketResponse ticket = restTemplate.getForObject(endpoint, CreateTicketResponse.class);  
-      logger.info("Succeeded with " + ticket);
+      logger.info("GenerateTicketAdapter - Succeeded with " + ticket);
 
       return Collections.singletonMap(ProcessConstants.VAR_TICKET_ID, ticket.ticketId);
     }

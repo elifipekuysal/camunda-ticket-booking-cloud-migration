@@ -27,13 +27,13 @@ public class SeatReservationAdapter {
 
   @JobWorker(type = "reserve-seats")
   public Map<String, Object> callSeatReservationRestService(final ActivatedJob job) throws IOException {
-    logger.info("Reserve seats via REST [" + job + "]");
+    logger.info("SeatReservationAdapter - Reserve seats via REST [" + job + "]");
 
     if ("seats".equalsIgnoreCase((String) job.getVariablesAsMap().get(ProcessConstants.VAR_SIMULATE_BOOKING_FAILURE))) {
       throw new IOException("[Simulated] Could not connect to HTTP server");
     } else {
       SeatReservationResponse reservation = restTemplate.getForObject(endpoint, SeatReservationResponse.class);
-      logger.info("Succeeded with " + reservation);
+      logger.info("SeatReservationAdapter - Succeeded with " + reservation);
 
       return Collections.singletonMap(ProcessConstants.VAR_RESERVATION_ID, reservation.reservationId);
     }

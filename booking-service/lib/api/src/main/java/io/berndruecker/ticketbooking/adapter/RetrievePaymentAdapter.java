@@ -38,7 +38,7 @@ public class RetrievePaymentAdapter {
 
   @JobWorker(type = "retrieve-payment")
   public Map<String, Object> callPaymentReceiverRestService(final ActivatedJob job) throws IOException {
-    logger.info("Receive payment via REST [" + job + "]");
+    logger.info("RetrievePaymentAdapter - Receive payment via REST [" + job + "]");
 
     if ("payment"
         .equalsIgnoreCase((String) job.getVariablesAsMap().get(ProcessConstants.VAR_SIMULATE_BOOKING_FAILURE))) {

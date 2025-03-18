@@ -14,7 +14,6 @@ exports.handler = async (event) => {
 
 async function processMessageAsync(message) {
     try {
-        console.log(`Processed message ${message.body}`);
         var paymentRequest = JSON.parse(message.body);
 
         console.log("\n\n [x] Received payment request %s", paymentRequest.paymentRequestId);

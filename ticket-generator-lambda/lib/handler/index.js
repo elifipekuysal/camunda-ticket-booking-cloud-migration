@@ -1,6 +1,6 @@
 const mongo = require("mongodb");
 const crypto = require("crypto");
-const clientSecretsManager = require("@aws-sdk/client-secrets-manager");
+const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
 
 const DOCUMENTDB_SECRET_ARN = process.env.DOCUMENTDB_SECRET_ARN;
 const DOCUMENTDB_ENDPOINT = process.env.DOCUMENTDB_ENDPOINT;
@@ -10,12 +10,11 @@ const DOCUMENTDB_CA_FILE = process.env.DOCUMENTDB_CA_FILE;
 const DATABASE_NAME = "ticket-booking";
 const COLLECTION_NAME = "tickets";
 
+let mongoClient;
+let cachedSecret;
+
 exports.handler = async (event) => {
-  console.log("Generate tickets now...");
-
-  const { httpMethod } = event;
-
-  if (httpMethod !== "GET") {
+  if (event.httpMethod !== "GET") {
     return {
       statusCode: 405,
       body: JSON.stringify({ error: "Method Not Allowed" }),
@@ -23,50 +22,63 @@ exports.handler = async (event) => {
   }
 
   try {
-    var ticketId = crypto.randomUUID();
-    console.log("\n\n [x] Create Ticket %s", ticketId);
+    const ticketId = crypto.randomUUID();
 
-    const connectionString = await getDocumentDBConnectionString();
-    console.log(`Document DB - connection string: ${connectionString}`);
-
-    const client = new mongo.MongoClient(connectionString, {
-      tls: true,
-      tlsCAFile: DOCUMENTDB_CA_FILE,
-    });
-
-    await client.connect();
-
+    const client = await getMongoClient();
     const db = client.db(DATABASE_NAME);
     const collection = db.collection(COLLECTION_NAME);
 
     await collection.insertOne({ ticketId, createdAt: new Date() });
 
-    console.log("Successul :-)");
     return {
       statusCode: 200,
-      body: JSON.stringify({ ticketId: ticketId }),
+      body: JSON.stringify({ ticketId }),
     };
   } catch (error) {
     console.error("Error processing request:", error);
+
     return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Invalid request format" }),
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
     };
   }
 };
 
+async function getMongoClient() {
+  if (mongoClient && mongoClient.topology && mongoClient.topology.isConnected()) {
+    return mongoClient;
+  }
+
+  const connectionString = await getDocumentDBConnectionString();
+
+  mongoClient = new mongo.MongoClient(connectionString, {
+    tls: true,
+    tlsCAFile: DOCUMENTDB_CA_FILE,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+  });
+
+  await mongoClient.connect();
+
+  return mongoClient;
+}
+
 async function getDocumentDbSecrets() {
-  console.log("Getting Document DB credentials");
+  if (cachedSecret) {
+    return cachedSecret;
+  }
 
   try {
-    const client = new clientSecretsManager.SecretsManagerClient();
-    const secretData = await client.send(new clientSecretsManager.GetSecretValueCommand({ SecretId: DOCUMENTDB_SECRET_ARN }));
+    const client = new SecretsManagerClient();
+    const secretData = await client.send(new GetSecretValueCommand({ SecretId: DOCUMENTDB_SECRET_ARN }));
 
     if (!secretData || !secretData.SecretString) {
       throw new Error("No secret data found");
     }
 
-    return JSON.parse(secretData.SecretString);
+    cachedSecret = JSON.parse(secretData.SecretString);
+    return cachedSecret;
   } catch (error) {
     console.error("Error fetching secret:", error);
     throw error;
@@ -74,16 +86,11 @@ async function getDocumentDbSecrets() {
 }
 
 async function getDocumentDBConnectionString() {
-  console.log("Generating Document DB connection");
-
   try {
     const credentials = await getDocumentDbSecrets();
-    const username = credentials.username;
-    const password = credentials.password;
-
-    return `mongodb://${username}:${password}@${DOCUMENTDB_ENDPOINT}:${DOCUMENTDB_PORT}/?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`;
+    return `mongodb://${credentials.username}:${credentials.password}@${DOCUMENTDB_ENDPOINT}:${DOCUMENTDB_PORT}/?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`;
   } catch (error) {
-    console.log(JSON.stringify({ error: "Failed to create connection string", details: error.message }));
+    console.error("Failed to create connection string:", error);
     throw error;
   }
 }
