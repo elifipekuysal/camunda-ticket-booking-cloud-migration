@@ -8,5 +8,10 @@ module.exports = {
     libraryTarget: 'commonjs2',
     path: path.resolve(__dirname, './lib/dist'),
     filename: 'index.js',
+  },
+  resolve: {
+    fallback: {
+      crypto: false
+    }
   }
 };

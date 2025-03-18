@@ -1,5 +1,6 @@
 const mongo = require("mongodb");
 const crypto = require("crypto");
+const clientSecretsManager = require("@aws-sdk/client-secrets-manager");
 
 const DOCUMENTDB_SECRET_ARN = process.env.DOCUMENTDB_SECRET_ARN;
 const DOCUMENTDB_ENDPOINT = process.env.DOCUMENTDB_ENDPOINT;
@@ -58,10 +59,13 @@ async function getDocumentDbSecrets() {
   console.log("Getting Document DB credentials");
 
   try {
-    const secretData = await secretsManager.getSecretValue({ SecretId: DOCUMENTDB_SECRET_ARN }).promise();
+    const client = new clientSecretsManager.SecretsManagerClient();
+    const secretData = await client.send(new clientSecretsManager.GetSecretValueCommand({ SecretId: DOCUMENTDB_SECRET_ARN }));
+
     if (!secretData || !secretData.SecretString) {
       throw new Error("No secret data found");
     }
+
     return JSON.parse(secretData.SecretString);
   } catch (error) {
     console.error("Error fetching secret:", error);
