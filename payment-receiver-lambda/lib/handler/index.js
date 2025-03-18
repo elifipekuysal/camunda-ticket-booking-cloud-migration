@@ -13,15 +13,17 @@ exports.handler = async (event) => {
     }
 
     try {
-        console.log(`\n\n [x] queryStringParameters: ${JSON.stringify(queryStringParameters)}`);
-        console.log(`\n\n [x] Received payment request ${queryStringParameters.paymentRequestId}`);
+        const paymentRequestId = queryStringParameters.paymentRequestId;
+
+        console.log(`\n\n [x] Received payment request ${paymentRequestId}`);
 
         const paymentConfirmationResponse = {
-            paymentRequestId: paymentRequest.paymentRequestId,
+            paymentRequestId: paymentRequestId,
             paymentConfirmationId: crypto.randomUUID()
         }
 
         console.log(" [x] Sent payment response %s", JSON.stringify(paymentConfirmationResponse));
+        
         return {
             statusCode: 200,
             body: JSON.stringify(paymentConfirmationResponse),
