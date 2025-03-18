@@ -64,8 +64,8 @@ export class BookingServiceStack extends Stack {
     });
 
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'BookingServiceTaskDef', {
-      cpu: 512,
-      memoryLimitMiB: 1024,
+      cpu: 2048,
+      memoryLimitMiB: 4096,
     });
 
     const containerImage = ecs.ContainerImage.fromAsset(path.join(__dirname, 'api'));

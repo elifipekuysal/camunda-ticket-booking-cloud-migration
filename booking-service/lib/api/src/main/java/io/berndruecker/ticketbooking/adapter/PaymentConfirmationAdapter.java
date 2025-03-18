@@ -33,6 +33,7 @@ public class PaymentConfirmationAdapter {
 
       try {
         PaymentResponseMessage paymentResponse = objectMapper.readValue(message, PaymentResponseMessage.class);
+        logger.info("PaymentSqsReceiver - paymentResponse: " + paymentResponse);
 
         client.newPublishMessageCommand()
             .messageName("msg-payment-received")
@@ -40,6 +41,8 @@ public class PaymentConfirmationAdapter {
             .variables(Collections.singletonMap("paymentConfirmationId", paymentResponse.paymentConfirmationId))
             .send()
             .join();
+
+        logger.info("PaymentSqsReceiver - Succeeded with " + paymentResponse.paymentConfirmationId);
       } catch (Exception e) {
         logger.error("Error processing SQS message", e);
       }
