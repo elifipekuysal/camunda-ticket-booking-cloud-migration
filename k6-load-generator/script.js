@@ -1,10 +1,11 @@
 import http from 'k6/http';
+import { check } from 'k6';
 
 export const options = {
   // A number specifying the number of VUs to run concurrently.
-  vus: 10,
+  vus: 500,
   // A string specifying the total duration of the test run.
-  duration: '30s',
+  duration: '1m',
 };
 
 // Use the following options to ramp the number of VUs up and down during the test
@@ -17,8 +18,7 @@ export const optionsForRampingVus = {
 };
 
 export default function() {
-  // Change the IpAddress with the ECS domain name/ip address
-  let response = http.put('http://localhost:8080/ticket');
+  let response = http.put('http://ticket-booking-alb-670218667.eu-central-1.elb.amazonaws.com/ticket?simulateBookingFailure=none');
 
   check(response, {
       'is status 200': (r) => r.status === 200,
