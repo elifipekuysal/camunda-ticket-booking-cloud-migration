@@ -4,7 +4,6 @@ import {
   aws_lambda as lambda,
   aws_ec2 as ec2,
   aws_iam as iam,
-  aws_secretsmanager as secretsmanager,
   Stack,
   StackProps,
   Fn,

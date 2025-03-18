@@ -28,7 +28,9 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
+    "bson": "^6.10.3",
     "crypto": "^1.0.1",
-    "mongodb": "^6.14.2"
+    "mongodb": "^6.14.2",
+    "mongodb-connection-string-url": "^3.0.2"
   }
 }

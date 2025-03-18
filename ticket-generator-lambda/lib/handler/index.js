@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+const mongo = require("mongodb");
 const crypto = require("crypto");
 
 const DOCUMENTDB_SECRET_ARN = process.env.DOCUMENTDB_SECRET_ARN;
@@ -28,7 +28,7 @@ exports.handler = async (event) => {
     const connectionString = await getDocumentDBConnectionString();
     console.log(`Document DB - connection string: ${connectionString}`);
 
-    const client = new MongoClient(connectionString, {
+    const client = new mongo.MongoClient(connectionString, {
       tls: true,
       tlsCAFile: DOCUMENTDB_CA_FILE,
     });
