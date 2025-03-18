@@ -56,10 +56,9 @@ jobs:
 
       - name: Package Lambda Deployment with CA File
         run: |
-          ls -lah
           cp global-bundle.pem ./lib/dist/ 
           cd ./lib/dist/ 
-          zip -r ../lambda-deployment.zip .
+          zip -r ../lambda-deployment.zip index.js global-bundle.pem
         working-directory: ticket-generator-lambda
 
       - name: Validate CloudFormation Template

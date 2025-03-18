@@ -64,8 +64,8 @@ export class BookingServiceStack extends Stack {
     });
 
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'BookingServiceTaskDef', {
-      cpu: 2048,
-      memoryLimitMiB: 4096,
+      cpu: 1024,
+      memoryLimitMiB: 2048,
     });
 
     const containerImage = ecs.ContainerImage.fromAsset(path.join(__dirname, 'api'));
@@ -94,7 +94,7 @@ export class BookingServiceStack extends Stack {
       serviceName: 'booking-service',
       cluster: ticketBookingCluster,
       taskDefinition,
-      desiredCount: 1,
+      desiredCount: 2,
       securityGroups: [securityGroup],
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
@@ -106,7 +106,7 @@ export class BookingServiceStack extends Stack {
     });
 
     const scalableTarget = ecsService.autoScaleTaskCount({
-      minCapacity: 1,
+      minCapacity: 2,
       maxCapacity: 6,
     });
 
