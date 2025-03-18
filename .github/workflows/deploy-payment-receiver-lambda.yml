@@ -49,17 +49,16 @@ jobs:
         run: npm i
         working-directory: payment-receiver-lambda
 
-      - name: Build Lambda Bundle with Webpack
-        run: |
-          npx webpack
-        working-directory: payment-receiver-lambda
-
       - name: Validate CloudFormation Template
         run: cdk synth --app "npx ts-node bin/.pipeline.ts"
         working-directory: payment-receiver-lambda
 
       - name: Run Jest Tests
         run: npm test
+        working-directory: payment-receiver-lambda
+
+      - name: Build Lambda Bundle with Webpack
+        run: npx webpack
         working-directory: payment-receiver-lambda
 
       - name: Deploy Stack

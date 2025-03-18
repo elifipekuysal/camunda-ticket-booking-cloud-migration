@@ -49,6 +49,14 @@ jobs:
         run: npm i
         working-directory: ticket-generator-lambda
 
+      - name: Validate CloudFormation Template
+        run: cdk synth --app "npx ts-node bin/.pipeline.ts"
+        working-directory: ticket-generator-lambda
+
+      - name: Run Jest Tests
+        run: npm test
+        working-directory: ticket-generator-lambda
+
       - name: Build Lambda Bundle with Webpack
         run: npx webpack
         working-directory: ticket-generator-lambda
@@ -58,14 +66,6 @@ jobs:
           cp global-bundle.pem ./lib/dist/ 
           cd ./lib/dist/ 
           zip -r ../lambda-deployment.zip index.js global-bundle.pem
-        working-directory: ticket-generator-lambda
-
-      - name: Validate CloudFormation Template
-        run: cdk synth --app "npx ts-node bin/.pipeline.ts"
-        working-directory: ticket-generator-lambda
-
-      - name: Run Jest Tests
-        run: npm test
         working-directory: ticket-generator-lambda
 
       - name: Deploy Stack
