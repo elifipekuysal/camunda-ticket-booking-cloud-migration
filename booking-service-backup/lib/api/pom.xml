@@ -87,6 +87,23 @@
             <version>8.1.16</version>
         </dependency>
 
+        <!-- AWS SDK SQS -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>netty-nio-client</artifactId>
+        </dependency>
+        
+        <!-- Spring Cloud AWS SQS for @SqsListener -->
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter-sqs</artifactId>
+        </dependency>
+
         <!-- gRPC -->
         <dependency>
             <groupId>io.grpc</groupId>

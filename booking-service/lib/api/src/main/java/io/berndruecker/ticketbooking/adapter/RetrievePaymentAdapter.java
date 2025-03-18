@@ -1,7 +1,6 @@
 package io.berndruecker.ticketbooking.adapter;
 
 import io.berndruecker.ticketbooking.ProcessConstants;
-
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import org.slf4j.Logger;
@@ -9,10 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import software.amazon.awssdk.services.sqs.SqsAsyncClient;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
-
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -20,28 +18,43 @@ import java.util.UUID;
 @Component
 public class RetrievePaymentAdapter {
 
-    private Logger logger = LoggerFactory.getLogger(RetrievePaymentAdapter.class);
+  Logger logger = LoggerFactory.getLogger(RetrievePaymentAdapter.class);
 
-    @Autowired
-    private SqsAsyncClient sqsAsyncClient;
+  @Value("${ticketbooking.paymentreceiver.lambda.endpoint}")
+  private String endpoint;
 
-    @Value("${aws.sqs.paymentRequestQueueUrl}")
-    private String paymentRequestQueueUrl;
+  @Autowired
+  private RestTemplate restTemplate;
 
-    @JobWorker(type = "retrieve-payment")
-    public Map<String, Object> retrievePayment(final ActivatedJob job) {
-        logger.info("Sending message to retrieve payment: " + job);
+  @JobWorker(type = "retrieve-payment")
+  public Map<String, Object> callPaymentReceiverRestService(final ActivatedJob job) throws IOException {
+    logger.info("Receive payment via REST [" + job + "]");
 
-        String paymentRequestId = UUID.randomUUID().toString();
+    if ("payment"
+        .equalsIgnoreCase((String) job.getVariablesAsMap().get(ProcessConstants.VAR_SIMULATE_BOOKING_FAILURE))) {
+      throw new IOException("[Simulated] Could not connect to HTTP server");
+    } else {
+      String paymentRequestId = UUID.randomUUID().toString();
 
-        SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
-                .messageBody("{\"paymentRequestId\": \"" + paymentRequestId + "\"}")
-                .queueUrl(paymentRequestQueueUrl)
-                .build();
+      PaymentResponseMessage paymentResponse = restTemplate
+          .getForObject(String.format("%s?paymentRequestId=%s", endpoint, paymentRequestId),
+              PaymentResponseMessage.class);
 
-        sqsAsyncClient.sendMessage(sendMessageRequest);
-        logger.info("Sent payment request to SQS: " + paymentRequestId);
+      logger.info("RetrievePaymentAdapter - Succeeded with " + paymentResponse.paymentConfirmationId);
 
-        return Collections.singletonMap(ProcessConstants.VAR_PAYMENT_REQUEST_ID, paymentRequestId);
+      return Collections.singletonMap(ProcessConstants.VAR_PAYMENT_CONFIRMATION_ID,
+          paymentResponse.paymentConfirmationId);
     }
+  }
+
+  public static class PaymentResponseMessage {
+    public String paymentRequestId;
+    public String paymentConfirmationId;
+
+    @Override
+    public String toString() {
+      return "PaymentResponseMessage [paymentRequestId=" + paymentRequestId + ", paymentConfirmationId="
+          + paymentConfirmationId + "]";
+    }
+  }
 }
