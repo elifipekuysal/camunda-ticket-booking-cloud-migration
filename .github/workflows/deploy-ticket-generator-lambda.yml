@@ -50,8 +50,7 @@ jobs:
         working-directory: ticket-generator-lambda
 
       - name: Build Lambda Bundle with Webpack
-        run: |
-          npx webpack
+        run: npx webpack
         working-directory: ticket-generator-lambda
 
       - name: Package Lambda Deployment with CA File

@@ -64,7 +64,7 @@ export class TicketGeneratorLambdaStack extends Stack {
           image: lambda.Runtime.NODEJS_18_X.bundlingImage,
           command: [
             'bash', '-c', 
-            'cp -r /asset-input/* /asset-output/ && cp /asset-input/global-bundle.pem /asset-output/'
+            'cp /asset-input/index.js /asset-output/ && cp /asset-input/global-bundle.pem /asset-output/'
           ]
         }
       }),
