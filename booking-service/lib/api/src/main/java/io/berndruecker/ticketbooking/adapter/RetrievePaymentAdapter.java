@@ -32,7 +32,7 @@ public class RetrievePaymentAdapter {
   @Autowired
   private RestTemplate restTemplate;
 
-  public RetrievePaymentAdapter(@Qualifier("zeebeClientLifecycle") ZeebeClient client, ObjectMapper objectMapper) {
+  public RetrievePaymentAdapter(@Qualifier("zeebeClientLifecycle") ZeebeClient client) {
     this.client = client;
   }
 
@@ -59,8 +59,7 @@ public class RetrievePaymentAdapter {
 
       logger.info("RetrievePaymentAdapter - Succeeded with " + paymentResponse.paymentConfirmationId);
 
-      return Collections.singletonMap(ProcessConstants.VAR_PAYMENT_CONFIRMATION_ID,
-          paymentResponse.paymentConfirmationId);
+      return Collections.singletonMap(ProcessConstants.VAR_PAYMENT_REQUEST_ID, paymentRequestId);
     }
   }
 
