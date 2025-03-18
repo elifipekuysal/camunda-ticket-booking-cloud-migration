@@ -50,7 +50,11 @@ jobs:
         working-directory: ticket-generator-lambda
 
       - name: Build Lambda Bundle with Webpack
-        run: npx webpack
+        run: |
+          npx webpack
+          cp global-bundle.pem dist/
+          cd dist
+          zip -r ../lambda-deployment.zip .
         working-directory: ticket-generator-lambda
 
       - name: Validate CloudFormation Template

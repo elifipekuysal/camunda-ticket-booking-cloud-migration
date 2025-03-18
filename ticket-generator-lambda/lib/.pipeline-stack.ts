@@ -10,6 +10,7 @@ import {
   Duration,
   CfnDeletionPolicy,
   CfnOutput,
+  AssetHashType,
 } from 'aws-cdk-lib';
 import * as path from 'path';
 
@@ -57,7 +58,16 @@ export class TicketGeneratorLambdaStack extends Stack {
       },
       securityGroups: [securityGroup],
       handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, 'dist')),
+      code: lambda.Code.fromAsset(path.join(__dirname, 'dist'), { 
+        assetHashType: AssetHashType.SOURCE,
+        bundling: {
+          image: lambda.Runtime.NODEJS_18_X.bundlingImage,
+          command: [
+            'bash', '-c', 
+            'cp -r /asset-input/* /asset-output/ && cp /asset-input/global-bundle.pem /asset-output/'
+          ]
+        }
+      }),
       memorySize: 128,
       timeout: Duration.millis(60 * 1000),
       environment: {
