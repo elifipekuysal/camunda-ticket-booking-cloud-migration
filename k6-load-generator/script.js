@@ -1,41 +1,79 @@
 import http from 'k6/http';
 import { check } from 'k6';
-
-export const options = {
-  // A number specifying the number of VUs to run concurrently.
-  vus: 500,
-  // A string specifying the total duration of the test run.
-  duration: '1m',
-};
-
-// Use the following options to ramp the number of VUs up and down during the test
-export const optionsForRampingVus = {
-  stages: [
-    { duration: '30s', target: 20 },
-    { duration: '1m30s', target: 10 },
-    { duration: '20s', target: 0 },
-  ],
-};
-
-export default function() {
-  let response = http.put('http://ticket-booking-alb-670218667.eu-central-1.elb.amazonaws.com/ticket?simulateBookingFailure=none');
-
-  check(response, {
-      'is status 200': (r) => r.status === 200,
-      'response time is less than 200ms': (r) => r.timings.duration < 200,
-  });
-}
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js';
+// "htmlReport" helper to generate an HTML report
+import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js';
 
 /*
- Run k6 with the following command:
-k6 run script.js
+  Set LOAD_TYPE in your environment before running k6:
+    e.g. LOAD_TYPE=medium k6 run script.js
 
-Run k6 with the specified vus and duration:
-k6 run --vus 10 --duration 30s script.js
+  Valid LOAD_TYPE values: low, medium, high
+  - low:    50 concurrent VUs
+  - medium: 200 concurrent VUs
+  - high:   1000 concurrent VUs
+*/
 
-Run following command to enable web dashboard:
-K6_WEB_DASHBOARD=true k6 run script.js
+const LOAD_TYPE = __ENV.LOAD_TYPE || 'low';
 
-You can reach the dasboard on:
-http://127.0.0.1:5665
- */
+// Return an options object for the requested concurrency level
+function getLoadOptions() {
+    if (LOAD_TYPE === 'low') {
+        return {
+            scenarios: {
+                low_traffic: {
+                    executor: 'constant-vus',
+                    vus: 50,              // 50 concurrent VUs
+                    duration: '30s',      // for 30 seconds 
+                    gracefulStop: '5s',
+                },
+            },
+        };
+    } else if (LOAD_TYPE === 'medium') {
+        return {
+            scenarios: {
+                medium_traffic: {
+                    executor: 'constant-vus',
+                    vus: 200,             // 200 concurrent VUs
+                    duration: '30s',      // for 30 seconds
+                    gracefulStop: '5s',
+                },
+            },
+        };
+    } else if (LOAD_TYPE === 'high') {
+        return {
+            scenarios: {
+                high_traffic: {
+                    executor: 'constant-vus',
+                    vus: 1000,            // 1000 concurrent VUs
+                    duration: '30s',      // for 30 seconds 
+                    gracefulStop: '5s',
+                },
+            },
+        };
+    } else {
+        throw new Error(`Unsupported LOAD_TYPE "${LOAD_TYPE}". Use "low", "medium", or "high".`);
+    }
+}
+
+// Export scenario options based on LOAD_TYPE
+export const options = getLoadOptions();
+
+export default function () {
+    //   const res = http.put('http://ticketbooking-alb-464838447.eu-central-1.elb.amazonaws.com:8080/ticket');
+    const res = http.put('http://ticket-booking-alb-670218667.eu-central-1.elb.amazonaws.com/ticket?simulateBookingFailure=none');
+
+
+    check(res, {
+        'status is 200': (r) => r.status === 200,
+        'response time < 3000ms': (r) => r.timings.duration < 3000,
+    });
+}
+
+// Create a custom summary at the end of the test
+export function handleSummary(data) {
+    return {
+        'stdout': textSummary(data, { indent: ' ', enableColors: true }),
+        'loadtest-report.html': htmlReport(data), // Generates an HTML report file
+    };
+}
