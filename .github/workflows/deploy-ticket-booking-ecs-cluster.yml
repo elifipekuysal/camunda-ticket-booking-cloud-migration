@@ -1,9 +1,6 @@
 name: Deploy Ticket Booking ECS Cluster
 
 on:
-  pull_request:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       branch:

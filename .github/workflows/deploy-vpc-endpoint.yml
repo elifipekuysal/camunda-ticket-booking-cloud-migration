@@ -1,9 +1,6 @@
 name: Deploy API Gateway VPC Endpoint Stack
 
 on:
-  pull_request:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       branch:

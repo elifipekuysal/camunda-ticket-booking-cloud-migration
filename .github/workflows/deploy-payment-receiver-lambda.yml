@@ -1,9 +1,6 @@
 name: Deploy Payment Receiver Lambda Stack
 
 on:
-  pull_request:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       branch:
