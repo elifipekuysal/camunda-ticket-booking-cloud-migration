@@ -69,7 +69,7 @@ export class ZeebeStack extends Stack {
       serviceName: 'zeebe-engine',
       cluster: ticketBookingCluster,
       taskDefinition,
-      desiredCount: 1,
+      desiredCount: 2,
       securityGroups: [securityGroup],
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       cloudMapOptions: {
@@ -81,7 +81,7 @@ export class ZeebeStack extends Stack {
     });
 
     const scalableTarget = ecsService.autoScaleTaskCount({
-      minCapacity: 1,
+      minCapacity: 2,
       maxCapacity: 6,
     });
 
