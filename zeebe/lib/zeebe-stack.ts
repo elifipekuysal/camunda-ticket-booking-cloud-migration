@@ -36,8 +36,8 @@ export class ZeebeStack extends Stack {
     securityGroup.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(26502), 'Allow Zeebe command API');
 
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'ZeebeTaskDef', {
-      cpu: 2048,
-      memoryLimitMiB: 4096,
+      cpu: 4096,
+      memoryLimitMiB: 8192,
     });
 
     taskDefinition.addContainer('zeebe', {
@@ -69,7 +69,7 @@ export class ZeebeStack extends Stack {
       serviceName: 'zeebe-engine',
       cluster: ticketBookingCluster,
       taskDefinition,
-      desiredCount: 2,
+      desiredCount: 1,
       securityGroups: [securityGroup],
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       cloudMapOptions: {
@@ -81,7 +81,7 @@ export class ZeebeStack extends Stack {
     });
 
     const scalableTarget = ecsService.autoScaleTaskCount({
-      minCapacity: 2,
+      minCapacity: 1,
       maxCapacity: 6,
     });
 
